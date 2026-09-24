@@ -1,0 +1,1981 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>CYBER_BIO // MULTI-LANGUAGE SINGULARITY</title>
+  
+  <!-- Custom Vielotta Font -->
+  <style>
+    @font-face {
+      font-family: 'Vielotta';
+      src: url('fonts/Vielotta-Regular.otf') format('opentype'),
+           url('fonts/Vielotta-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+  </style>
+
+  <!-- Secondary Complementary Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Three.js + Lenis Smooth Scroll -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #020306;
+      --accent: #ff9d00;
+      --accent-glow: rgba(255, 157, 0, 0.45);
+      --accent-blue: #00f3ff;
+      --font-display: 'Vielotta', serif;
+      --font-heading: 'Vielotta', serif;
+      --font-mono: 'Space Mono', monospace;
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    /* TRIỆT ĐỂ CHỐNG BÔI ĐEN VÀ CHỌN VĂN BẢN */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      cursor: none !important;
+      user-select: none !important;
+      -webkit-user-select: none !important;
+    }
+
+    /* CLICK PARTICLES CANVAS OVERLAY */
+    #click-particles-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 100005;
+    }
+
+    /* CUSTOM SKIN CURSOR */
+    #cursor-dot {
+      position: fixed;
+      top: 0; left: 0;
+      width: 6px; height: 6px;
+      background: #fff;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 100000;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 10px #fff, 0 0 20px var(--accent);
+      transition: transform 0.08s ease-out;
+    }
+
+    #cursor-ring {
+      position: fixed;
+      top: 0; left: 0;
+      width: 38px; height: 38px;
+      border: 1.5px solid rgba(255, 157, 0, 0.75);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 99999;
+      transform: translate(-50%, -50%);
+      transition: width 0.25s, height 0.25s, border-color 0.25s, background-color 0.25s;
+    }
+
+    #cursor-ring.hovering {
+      width: 64px; height: 64px;
+      border-color: #00f3ff;
+      background: rgba(0, 243, 255, 0.08);
+      box-shadow: 0 0 25px rgba(0, 243, 255, 0.35);
+    }
+
+    #cursor-tag {
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 99998;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.55);
+      letter-spacing: 1px;
+      transform: translate(24px, 16px);
+      display: none;
+    }
+
+    @media (pointer: fine) {
+      #cursor-tag { display: block; }
+    }
+
+    /* LOADER GUI */
+    #loader-gui {
+      position: fixed;
+      inset: 0;
+      background: #020306;
+      z-index: 200000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
+    }
+
+    #loader-gui.loaded {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .loader-core {
+      position: relative;
+      width: 140px; height: 140px;
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .loader-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      border-top-color: var(--accent);
+      border-bottom-color: var(--accent-blue);
+      animation: loader-spin 1.8s linear infinite;
+    }
+
+    .loader-ring-inner {
+      position: absolute;
+      inset: 16px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(255, 255, 255, 0.3);
+      animation: loader-spin-rev 3s linear infinite;
+    }
+
+    .loader-dot-center {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 25px #fff, 0 0 50px var(--accent);
+      animation: beacon-pulse 1s infinite alternate;
+    }
+
+    @keyframes loader-spin { to { transform: rotate(360deg); } }
+    @keyframes loader-spin-rev { to { transform: rotate(-360deg); } }
+
+    .loader-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+      color: #fff;
+      letter-spacing: 3px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .loader-status-stream {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 2px;
+      margin-bottom: 24px;
+      height: 18px;
+    }
+
+    .loader-bar-bg {
+      width: 280px; height: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .loader-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-blue));
+      box-shadow: 0 0 15px var(--accent);
+      transition: width 0.1s linear;
+    }
+
+    /* BẢO MẬT & CẢNH BÁO TOAST */
+    #security-toast {
+      position: fixed;
+      top: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-150%);
+      background: rgba(20, 4, 8, 0.95);
+      border: 1px solid #ff0055;
+      box-shadow: 0 10px 40px rgba(255, 0, 85, 0.4), inset 0 0 15px rgba(255, 0, 85, 0.2);
+      border-radius: 8px;
+      padding: 16px 28px;
+      z-index: 300000;
+      backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    #security-toast.active { transform: translateX(-50%) translateY(0); }
+    .toast-icon { font-size: 20px; color: #ff0055; animation: beacon-pulse 0.5s infinite alternate; }
+    .toast-title { font-family: var(--font-mono); font-size: 12px; font-weight: bold; color: #ff0055; letter-spacing: 1px; }
+    .toast-desc { font-family: var(--font-mono); font-size: 11px; color: #ffd6e0; }
+
+    #devtools-lockdown {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 1, 2, 0.98);
+      z-index: 400000;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 30px;
+      backdrop-filter: blur(30px);
+    }
+
+    #devtools-lockdown.active { display: flex; }
+    .lockdown-title { font-family: var(--font-display); font-size: clamp(32px, 5vw, 56px); color: #ff0055; margin-bottom: 16px; text-shadow: 0 0 20px #ff0055; }
+    .lockdown-desc { font-family: var(--font-mono); font-size: 14px; color: #ffb3c6; max-width: 600px; line-height: 1.8; }
+
+    /* LIQUID GLASS CONTAINERS & PHYSICS */
+    .liquid-glass-container {
+      perspective: 1400px;
+    }
+
+    .liquid-glass {
+      position: relative;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(10, 14, 22, 0.72) 40%, rgba(4, 6, 12, 0.85) 100%);
+      border-radius: 24px;
+      overflow: hidden;
+      backdrop-filter: blur(36px) saturate(220%) contrast(108%);
+      -webkit-backdrop-filter: blur(36px) saturate(220%) contrast(108%);
+      
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 
+        0 30px 70px -15px rgba(0, 0, 0, 0.9),
+        0 15px 35px -10px rgba(0, 0, 0, 0.7),
+        inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.5),
+        inset 0 -2px 3px 0 rgba(0, 0, 0, 0.6),
+        inset 0 0 40px rgba(255, 255, 255, 0.04);
+
+      transform-style: preserve-3d;
+      transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.35s ease;
+      will-change: transform;
+    }
+
+    .liquid-glass::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 2px;
+      background: linear-gradient(
+        var(--prism-angle, 135deg), 
+        rgba(255, 255, 255, 0.7) 0%, 
+        rgba(0, 243, 255, 0.4) 25%, 
+        rgba(255, 0, 128, 0.3) 50%, 
+        rgba(255, 157, 0, 0.5) 75%, 
+        rgba(255, 255, 255, 0.6) 100%
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      opacity: 0.5;
+      transition: opacity 0.3s;
+    }
+
+    .liquid-glass:hover::before { opacity: 1; }
+
+    .glass-glare {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        circle 380px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255, 255, 255, 0.22) 0%,
+        rgba(255, 215, 120, 0.08) 25%,
+        transparent 75%
+      );
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      z-index: 5;
+    }
+
+    .glass-shimmer {
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent 45%, rgba(255, 255, 255, 0.08) 50%, transparent 55%);
+      transform: rotate(25deg) translateY(-100%);
+      pointer-events: none;
+      transition: transform 0.8s ease;
+      z-index: 6;
+    }
+
+    .liquid-glass:hover .glass-glare { opacity: 1; }
+    .liquid-glass:hover .glass-shimmer { transform: rotate(25deg) translateY(100%); }
+
+    .liquid-glass:hover {
+      box-shadow: 
+        0 40px 90px -20px rgba(0, 0, 0, 0.95),
+        0 0 50px rgba(255, 157, 0, 0.2),
+        inset 0 2px 2px 0 rgba(255, 255, 255, 0.7),
+        inset 0 -2px 4px 0 rgba(0, 0, 0, 0.8);
+    }
+
+    /* Lenis Smooth Scroll */
+    html.lenis, html.lenis body { height: auto; }
+
+    body {
+      background-color: var(--bg);
+      color: #f0f4f8;
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    #blackhole-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 1;
+      pointer-events: auto;
+    }
+
+    .space-vignette {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, transparent 35%, rgba(3, 4, 7, 0.92) 95%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Header Nav */
+    header.nav-bar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      padding: 24px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 50;
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .singularity-beacon {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent);
+      animation: beacon-pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes beacon-pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(0.6); opacity: 0.3; }
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      letter-spacing: 2px;
+      font-weight: 400;
+      color: #fff;
+      text-transform: uppercase;
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* 🌐 NÚT CHỌN NGÔN NGỮ (LANGUAGE SELECTOR) */
+    .lang-dropdown-wrapper {
+      position: relative;
+    }
+
+    .lang-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.25s;
+      letter-spacing: 1px;
+    }
+
+    .lang-btn:hover {
+      border-color: var(--accent);
+      background: rgba(255, 157, 0, 0.1);
+      box-shadow: 0 0 15px rgba(255, 157, 0, 0.25);
+    }
+
+    .lang-menu {
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      background: rgba(10, 14, 22, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 14px;
+      padding: 8px;
+      min-width: 170px;
+      backdrop-filter: blur(28px) saturate(200%);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 25px rgba(255, 157, 0, 0.15);
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 1000;
+      animation: drop-fade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes drop-fade {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .lang-menu.open {
+      display: flex;
+    }
+
+    .lang-item {
+      padding: 8px 14px;
+      border-radius: 8px;
+      color: #b0c4d8;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s;
+    }
+
+    .lang-item:hover {
+      background: rgba(255, 157, 0, 0.15);
+      color: #fff;
+    }
+
+    .lang-item.active {
+      color: var(--accent);
+      font-weight: bold;
+      background: rgba(255, 157, 0, 0.08);
+    }
+
+    .audio-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      transition: all 0.2s;
+    }
+
+    .audio-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    /* Content Stream */
+    .content-stream {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 48px;
+    }
+
+    section.scene-section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 120px 0;
+      position: relative;
+    }
+
+    /* Profile Card */
+    .profile-hero-card {
+      padding: 56px;
+      max-width: 960px;
+    }
+
+    .profile-top {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .avatar-box {
+      position: relative;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 35px var(--accent-glow), inset 0 0 20px rgba(0, 243, 255, 0.3);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(30%) contrast(125%);
+    }
+
+    .profile-names {
+      flex: 1;
+    }
+
+    .ascii-header {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--accent);
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .name-display {
+      font-family: var(--font-display);
+      font-size: clamp(48px, 6vw, 76px);
+      font-weight: 400;
+      line-height: 1.0;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .status-role {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--accent-blue);
+      letter-spacing: 1px;
+    }
+
+    .bio-philosophy {
+      font-family: var(--font-body);
+      font-size: 18px;
+      line-height: 1.7;
+      color: #b8cde0;
+      border-left: 2px solid var(--accent);
+      padding-left: 18px;
+      margin-bottom: 32px;
+      font-style: italic;
+    }
+
+    .badge-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+
+    .bio-badge {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #9cb1c5;
+      letter-spacing: 1px;
+    }
+
+    .bio-badge.active-badge {
+      color: var(--accent);
+      border-color: rgba(255, 157, 0, 0.4);
+      background: rgba(255, 157, 0, 0.1);
+    }
+
+    /* Section 2: 3 Bio Samples */
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 5vw, 68px);
+      font-weight: 400;
+      letter-spacing: 1px;
+      color: #fff;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .section-meta {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent);
+      letter-spacing: 3px;
+      margin-bottom: 40px;
+      text-transform: uppercase;
+    }
+
+    .bio-samples-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 24px;
+    }
+
+    .sample-card {
+      padding: 34px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .sample-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .sample-type {
+      font-family: var(--font-heading);
+      font-size: 20px;
+      color: #fff;
+    }
+
+    .sample-target {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent);
+      background: rgba(255, 157, 0, 0.12);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .sample-box {
+      background: rgba(2, 4, 8, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 18px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.8;
+      color: #a0b8cc;
+      white-space: pre-wrap;
+      margin-bottom: 20px;
+      min-height: 150px;
+    }
+
+    .copy-btn {
+      background: rgba(255, 157, 0, 0.12);
+      border: 1px solid var(--accent);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: bold;
+      padding: 14px;
+      border-radius: 10px;
+      transition: all 0.25s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .copy-btn:hover {
+      background: var(--accent);
+      color: #000;
+      box-shadow: 0 0 25px var(--accent-glow);
+    }
+
+    /* Section 3: Social & Skills */
+    .social-links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .social-btn {
+      padding: 22px;
+      text-decoration: none;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .social-name {
+      font-family: var(--font-heading);
+      font-size: 18px;
+    }
+
+    .social-handle {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #7b8896;
+    }
+
+    .skills-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 900px;
+    }
+
+    .skill-card {
+      padding: 22px 30px;
+    }
+
+    .skill-info {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .bar-bg {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #ff4400);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+
+    /* Section 4: Terminal */
+    .terminal-wrapper {
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 18px;
+      overflow: hidden;
+      max-width: 900px;
+    }
+
+    .term-head {
+      background: rgba(9, 12, 18, 0.9);
+      padding: 14px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #7b8896;
+    }
+
+    .term-body {
+      padding: 24px;
+      min-height: 200px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.8;
+      color: #9cb1c5;
+    }
+
+    .term-input-row {
+      display: flex;
+      align-items: center;
+      padding: 14px 22px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(4, 6, 10, 0.8);
+    }
+
+    .term-prompt {
+      color: var(--accent);
+      font-weight: bold;
+      margin-right: 12px;
+    }
+
+    .term-field {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      width: 100%;
+    }
+
+    /* Sticky Footer */
+    footer.bottom-hud {
+      position: fixed;
+      bottom: 24px; left: 48px; right: 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 50;
+      pointer-events: none;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #5c6a78;
+    }
+
+    .hud-left, .hud-right {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      header.nav-bar { padding: 18px 24px; }
+      .content-stream { padding: 0 24px; }
+      footer.bottom-hud { display: none; }
+      .profile-hero-card { padding: 32px 24px; }
+      .name-display { font-size: 40px; }
+    }
+  </style>
+</head>
+<body oncontextmenu="triggerSecurityBreach('Chuột phải'); return false;">
+
+  <!-- CLICK PARTICLES CANVAS -->
+  <canvas id="click-particles-canvas"></canvas>
+
+  <!-- LOADER GUI -->
+  <div id="loader-gui">
+    <div class="loader-core">
+      <div class="loader-ring"></div>
+      <div class="loader-ring-inner"></div>
+      <div class="loader-dot-center"></div>
+    </div>
+    <div class="loader-title" id="loader-title">INITIALIZING QUANTUM PROFILE</div>
+    <div class="loader-status-stream" id="loader-status">CONNECTING TO GARGANTUA CORE [0%]</div>
+    <div class="loader-bar-bg">
+      <div class="loader-bar-fill" id="loader-progress"></div>
+    </div>
+  </div>
+
+  <!-- CẢNH BÁO TOAST -->
+  <div id="security-toast">
+    <div class="toast-icon">⚠</div>
+    <div>
+      <div class="toast-title" id="toast-title">SECURITY DEFENSE ACTIVE</div>
+      <div class="toast-desc" id="toast-desc">Hành vi bị ngăn chặn bởi hệ thống phòng thủ Kernel.</div>
+    </div>
+  </div>
+
+  <!-- FULLSCREEN DEVTOOLS LOCKDOWN -->
+  <div id="devtools-lockdown">
+    <div class="lockdown-title">SECURITY LOCKDOWN</div>
+    <div class="lockdown-desc" id="lockdown-desc">
+      [CẢNH BÁO MÃ ĐỘC]: Đã phát hiện công cụ kiểm tra mã nguồn (Developer Tools / Inspect Mode) đang hoạt động.<br>
+      Toàn bộ giao diện và dữ liệu đã được mã hóa tự động để bảo vệ quyền sở hữu trí tuệ.<br><br>
+      <strong>VUI LÒNG ĐÓNG DEVELOPER TOOLS ĐỂ MỞ KHÓA GIAO DIỆN.</strong>
+    </div>
+  </div>
+
+  <!-- Custom Skin Cursor -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+  <div id="cursor-tag">I18N LANG</div>
+
+  <!-- Three.js Canvas -->
+  <canvas id="blackhole-canvas"></canvas>
+  <div class="space-vignette"></div>
+
+  <!-- Header -->
+  <header class="nav-bar">
+    <div class="brand-group">
+      <div class="singularity-beacon"></div>
+      <div class="brand-title" id="i18n-brand">CYBER_PROFILE // AXIOM</div>
+    </div>
+    
+    <div class="nav-controls">
+      <!-- 🌐 DROPDOWN CHỌN NGÔN NGỮ PHỔ THÔNG -->
+      <div class="lang-dropdown-wrapper">
+        <button class="lang-btn" id="lang-btn-current" onclick="toggleLangMenu(event)">
+          <span>🌐</span>
+          <span id="current-lang-text">TIẾNG VIỆT</span>
+          <span style="font-size: 8px;">▼</span>
+        </button>
+        <div class="lang-menu" id="lang-dropdown-menu">
+          <div class="lang-item active" onclick="switchLanguage('vi')">
+            <span>🇻🇳 Tiếng Việt</span>
+            <span>✓</span>
+          </div>
+          <div class="lang-item" onclick="switchLanguage('en')">
+            <span>🇬🇧 English</span>
+            <span></span>
+          </div>
+          <div class="lang-item" onclick="switchLanguage('ja')">
+            <span>🇯🇵 日本語</span>
+            <span></span>
+          </div>
+          <div class="lang-item" onclick="switchLanguage('ko')">
+            <span>🇰🇷 한국어</span>
+            <span></span>
+          </div>
+          <div class="lang-item" onclick="switchLanguage('zh')">
+            <span>🇨🇳 中文</span>
+            <span></span>
+          </div>
+          <div class="lang-item" onclick="switchLanguage('es')">
+            <span>🇪🇸 Español</span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+
+      <button class="audio-btn active" id="audio-toggle" onclick="toggleAudio()">SOUND: ON</button>
+    </div>
+  </header>
+
+  <!-- Flowing Smooth-Scroll Content Stream -->
+  <main class="content-stream">
+
+    <!-- 01: HERO PERSONAL BIO PROFILE -->
+    <section class="scene-section" id="sec-profile">
+      <div class="liquid-glass-container">
+        <div class="profile-hero-card liquid-glass">
+          <div class="glass-glare"></div>
+          <div class="glass-shimmer"></div>
+          
+          <div class="profile-top">
+            <div class="avatar-box">
+              <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&auto=format&fit=crop&q=80" alt="Avatar" class="avatar-img">
+            </div>
+            <div class="profile-names">
+              <div class="ascii-header">root@kernel:~$ whoami</div>
+              <h1 class="name-display" id="user-display-name">Cyber_Architect</h1>
+              <div class="status-role" id="i18n-role">[SYS] Role: System Architect // Security Enthusiast</div>
+            </div>
+          </div>
+
+          <div class="bio-philosophy" id="i18n-philosophy">
+            "Không bao giờ viết dòng thứ tư nếu ba dòng là đủ giải quyết vấn đề. Sự tĩnh lặng và tốc độ là một. sudo shutdown -r now"
+          </div>
+
+          <div class="badge-bar">
+            <span class="bio-badge active-badge" id="i18n-status">[STATUS: ONLINE]</span>
+            <span class="bio-badge" id="i18n-class">[CLASS: ELITE HACKER]</span>
+            <span class="bio-badge">[KERNEL: HARDENED LINUX]</span>
+            <span class="bio-badge">[CLEARANCE: 0x7F]</span>
+            <span class="bio-badge">[I18N: ACTIVE]</span>
+          </div>
+
+          <div style="font-family:var(--font-mono); font-size:11px; color:#788899; display:flex; gap:16px;">
+            <span id="i18n-scroll-hint">✦ CUỘN TRANG XUỐNG ĐỂ LẤY MẪU BIO COPY CHO DISCORD / FB / TIKTOK</span>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 02: 3 MẪU BIO SẴN SÀNG COPY -->
+    <section class="scene-section" id="sec-samples">
+      <h2 class="section-title" id="i18n-samples-title">Mẫu Bio Mạng Xã Hội</h2>
+      <div class="section-meta" id="i18n-samples-meta">// COPY TRỰC TIẾP DÁN VÀO PROFILE CÁ NHÂN</div>
+
+      <div class="bio-samples-grid">
+        
+        <!-- BẢN 1: Minimalist Terminal -->
+        <div class="liquid-glass-container">
+          <div class="sample-card liquid-glass">
+            <div class="glass-glare"></div>
+            <div class="glass-shimmer"></div>
+            <div>
+              <div class="sample-head">
+                <span class="sample-type">Minimalist Terminal</span>
+                <span class="sample-target">LINUX / GITHUB</span>
+              </div>
+              <div class="sample-box" id="bio-copy-1">root@kernel:~$ whoami
+[ C Y B E R _ A R C H I T E C T ]
+[SYS] Role: System Architect // Security
+root@kernel:~$ cat skills.log
+>> [C++] [Linux Kernel] [Reverse Engineering]
+root@kernel:~$ sudo shutdown -r now</div>
+            </div>
+            <button class="copy-btn" onclick="copyBio('bio-copy-1', this)">
+              <span class="i18n-copy-text">[COPY BIO BẢN 1]</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- BẢN 2: Cyber Glitch / Hardcore Hacker -->
+        <div class="liquid-glass-container">
+          <div class="sample-card liquid-glass">
+            <div class="glass-glare"></div>
+            <div class="glass-shimmer"></div>
+            <div>
+              <div class="sample-head">
+                <span class="sample-type">Cyber Glitch Hacker</span>
+                <span class="sample-target">DISCORD / FB</span>
+              </div>
+              <div class="sample-box" id="bio-copy-2">█▄░█ ▄▀█ █▀▄▀█ █▀▀
+█░▀█ █▀█ █░▀░█ ██▄
+[STATUS: ACTIVE] | 0x7F_OVERRIDE
+► Class: Elite Hacker // Reverse Engineer
+► Tech: [C++] | [Linux] | [Game Modding]
+► System Load: ████████▒▒ 85%
+>> chmod +x life.sh && ./life.sh</div>
+            </div>
+            <button class="copy-btn" onclick="copyBio('bio-copy-2', this)">
+              <span class="i18n-copy-text">[COPY BIO BẢN 2]</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- BẢN 3: Compact One-liner -->
+        <div class="liquid-glass-container">
+          <div class="sample-card liquid-glass">
+            <div class="glass-glare"></div>
+            <div class="glass-shimmer"></div>
+            <div>
+              <div class="sample-head">
+                <span class="sample-type">Compact One-Liner</span>
+                <span class="sample-target">TIKTOK / INSTAGRAM</span>
+              </div>
+              <div class="sample-box" id="bio-copy-3">root@cyber:~$ // [C++ | Linux | Modding] | ███▒▒ 85% | exit(0);</div>
+            </div>
+            <button class="copy-btn" onclick="copyBio('bio-copy-3', this)">
+              <span class="i18n-copy-text">[COPY BIO BẢN 3]</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 03: SOCIAL UPLINKS & SKILLS MATRIX -->
+    <section class="scene-section" id="sec-socials">
+      <h2 class="section-title" id="i18n-socials-title">Kênh Kết Nối & Kỹ Năng</h2>
+      <div class="section-meta" id="i18n-socials-meta">// SOCIAL PROFILES & PROFICIENCY</div>
+
+      <div class="social-links-grid">
+        <div class="liquid-glass-container">
+          <a href="https://github.com" target="_blank" class="social-btn liquid-glass">
+            <div class="glass-glare"></div>
+            <div class="glass-shimmer"></div>
+            <div>
+              <div class="social-name">GitHub</div>
+              <div class="social-handle">@cyber_phantom</div>
+            </div>
+            <span style="color:var(--accent);">↗</span>
+          </a>
+        </div>
+
+        <div class="liquid-glass-container">
+          <a href="https://discord.com" target="_blank" class="social-btn liquid-glass">
+            <div class="glass-glare"></div>
+            <div class="glass-shimmer"></div>
+            <div>
+              <div class="social-name">Discord</div>
+              <div class="social-handle">axiom#0001</div>
+            </div>
+            <span style="color:var(--accent);">↗</span>
+          </a>
+        </div>
+
+        <div class="liquid-glass-container">
+          <a href="https://facebook.com" target="_blank" class="social-btn liquid-glass">
+            <div class="glass-glare"></div>
+            <div class="glass-shimmer"></div>
+            <div>
+              <div class="social-name">Facebook</div>
+              <div class="social-handle">/cyber.architect</div>
+            </div>
+            <span style="color:var(--accent);">↗</span>
+          </a>
+        </div>
+
+        <div class="liquid-glass-container">
+          <a href="https://tiktok.com" target="_blank" class="social-btn liquid-glass">
+            <div class="glass-glare"></div>
+            <div class="glass-shimmer"></div>
+            <div>
+              <div class="social-name">TikTok</div>
+              <div class="social-handle">@underground_dev</div>
+            </div>
+            <span style="color:var(--accent);">↗</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="skills-wrapper">
+        <div class="liquid-glass-container">
+          <div class="skill-card liquid-glass">
+            <div class="glass-glare"></div>
+            <div class="glass-shimmer"></div>
+            <div class="skill-info">
+              <span style="color:#fff; font-weight:bold;">C++ / C / Linux Kernel Modding</span>
+              <span style="color:var(--accent);">98%</span>
+            </div>
+            <div class="bar-bg"><div class="bar-fill" style="width: 98%;"></div></div>
+          </div>
+        </div>
+
+        <div class="liquid-glass-container">
+          <div class="skill-card liquid-glass">
+            <div class="glass-glare"></div>
+            <div class="glass-shimmer"></div>
+            <div class="skill-info">
+              <span style="color:#fff; font-weight:bold;">Reverse Engineering (IDA Pro / Ghidra)</span>
+              <span style="color:var(--accent);">94%</span>
+            </div>
+            <div class="bar-bg"><div class="bar-fill" style="width: 94%;"></div></div>
+          </div>
+        </div>
+
+        <div class="liquid-glass-container">
+          <div class="skill-card liquid-glass">
+            <div class="glass-glare"></div>
+            <div class="glass-shimmer"></div>
+            <div class="skill-info">
+              <span style="color:#fff; font-weight:bold;">Game Modding & Binary Analysis</span>
+              <span style="color:var(--accent);">90%</span>
+            </div>
+            <div class="bar-bg"><div class="bar-fill" style="width: 90%;"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04: TERMINAL BIO CONTROLLER -->
+    <section class="scene-section" id="sec-terminal">
+      <h2 class="section-title" id="i18n-term-title">Trung Tâm Điều Hành</h2>
+      <div class="section-meta" id="i18n-term-meta">// TÙY BIẾN PROFILE QUA DÒNG LỆNH</div>
+
+      <div class="liquid-glass-container">
+        <div class="terminal-wrapper liquid-glass">
+          <div class="glass-glare"></div>
+          <div class="glass-shimmer"></div>
+          <div class="term-head">
+            <span>bio_controller.sh</span>
+            <span>ROOT SHELL // I18N</span>
+          </div>
+          <div class="term-body" id="term-display">
+            <div>> HỆ THỐNG PROFILE ĐÃ ĐƯỢC ĐỒNG BỘ ĐA NGÔN NGỮ (I18N).</div>
+            <div>> Gõ 'name &lt;tên_mới&gt;' để đổi trực tiếp tên hiển thị trên web.</div>
+            <div>> Gõ 'help' để xem các lệnh quản lý profile.</div>
+          </div>
+          <form class="term-input-row" onsubmit="handleCommand(event)">
+            <span class="term-prompt">root@profile:~$</span>
+            <input type="text" id="term-in" class="term-field" autocomplete="off" spellcheck="false" placeholder="nhập lệnh (vd: name Nam, help, status, clear)...">
+          </form>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Sticky Footer -->
+  <footer class="bottom-hud">
+    <div class="hud-left">
+      <span>PROFILE: <strong style="color:#fff;">CYBER_ARCHITECT</strong></span>
+    </div>
+    <div class="hud-right">
+      <span>LANG: <strong id="hud-lang-tag" style="color:#00f3ff;">VI (TIẾNG VIỆT)</strong></span>
+      <span>ZOOM: <strong id="hud-zoom" style="color:var(--accent);">28.0</strong></span>
+    </div>
+  </footer>
+
+  <script>
+    /* =========================================================
+       🌐 1. I18N MULTI-LANGUAGE DICTIONARY & SWITCH ENGINE
+       ========================================================= */
+    const i18nData = {
+      vi: {
+        label: "TIẾNG VIỆT",
+        brand: "CYBER_PROFILE // AXIOM",
+        role: "[SYS] Role: System Architect // Security Enthusiast",
+        philosophy: '"Không bao giờ viết dòng thứ tư nếu ba dòng là đủ giải quyết vấn đề. Sự tĩnh lặng và tốc độ là một. sudo shutdown -r now"',
+        status: "[TRẠNG THÁI: TRỰC TUYẾN]",
+        class: "[CẤP BẬC: HACKER TINH ANH]",
+        scrollHint: "✦ CUỘN TRANG XUỐNG ĐỂ LẤY MẪU BIO COPY CHO DISCORD / FB / TIKTOK",
+        samplesTitle: "Mẫu Bio Mạng Xã Hội",
+        samplesMeta: "// COPY TRỰC TIẾP DÁN VÀO PROFILE CÁ NHÂN",
+        copyBtn: "[COPY BIO]",
+        copied: "✔ ĐÃ COPY VÀO CLIPBOARD!",
+        socialsTitle: "Kênh Kết Nối & Kỹ Năng",
+        socialsMeta: "// SOCIAL PROFILES & PROFICIENCY",
+        termTitle: "Trung Tâm Điều Hành",
+        termMeta: "// TÙY BIẾN PROFILE QUA DÒNG LỆNH",
+        termWelcome: "> HỆ THỐNG PROFILE ĐÃ ĐƯỢC ĐỒNG BỘ ĐA NGÔN NGỮ (I18N)."
+      },
+      en: {
+        label: "ENGLISH",
+        brand: "CYBER_PROFILE // AXIOM",
+        role: "[SYS] Role: System Architect // Security Enthusiast",
+        philosophy: '"Never write a fourth line if three can solve the problem. Stillness and speed are one. sudo shutdown -r now"',
+        status: "[STATUS: ONLINE]",
+        class: "[CLASS: ELITE HACKER]",
+        scrollHint: "✦ SCROLL DOWN TO ACQUIRE READY-TO-COPY BIOS FOR DISCORD / FB / TIKTOK",
+        samplesTitle: "Social Bio Templates",
+        samplesMeta: "// 1-CLICK COPY DIRECTLY INTO YOUR PROFILE",
+        copyBtn: "[COPY BIO]",
+        copied: "✔ COPIED TO CLIPBOARD!",
+        socialsTitle: "Social Uplinks & Skills",
+        socialsMeta: "// SOCIAL PROFILES & PROFICIENCY",
+        termTitle: "Command Center",
+        termMeta: "// DIRECT PROFILE COMMAND CONTROLLER",
+        termWelcome: "> MULTI-LANGUAGE I18N SYSTEM INITIALIZED AND SYNCHRONIZED."
+      },
+      ja: {
+        label: "日本語",
+        brand: "サイバー・プロファイル // AXIOM",
+        role: "[SYS] 役割: システムアーキテクト // セキュリティ研究員",
+        philosophy: '"3行で解決できる問題なら、4行目を書くことはない。静寂と速度は一つなり。sudo shutdown -r now"',
+        status: "[ステータス: オンライン]",
+        class: "[クラス: エリートハッカー]",
+        scrollHint: "✦ スクロールしてDiscord / FB / TikTok用バイオを取得",
+        samplesTitle: "ソーシャル・バイオ・テンプレート",
+        samplesMeta: "// ワンクリックでコピーしてプロファイルに貼り付け",
+        copyBtn: "[バイオをコピー]",
+        copied: "✔ クリップボードにコピー完了！",
+        socialsTitle: "リンク＆スキルマトリクス",
+        socialsMeta: "// ソーシャルプロファイル & 習熟度",
+        termTitle: "オペレーション・ターミナル",
+        termMeta: "// コマンドラインによるプロファイル管理",
+        termWelcome: "> 多言語システム (i18n) が正常に同期されました。"
+      },
+      ko: {
+        label: "한국어",
+        brand: "사이버_프로필 // AXIOM",
+        role: "[SYS] 역할: 시스템 아키텍트 // 보안 엔지니어",
+        philosophy: '"세 줄로 해결될 문제에 네 번째 줄을 쓰지 않는다. 고요함과 속도는 하나다. sudo shutdown -r now"',
+        status: "[상태: 온라인]",
+        class: "[클래스: 엘리트 해커]",
+        scrollHint: "✦ 스크롤하여 Discord / FB / TikTok용 바이오 확인",
+        samplesTitle: "소셜 바이오 템플릿",
+        samplesMeta: "// 원클릭으로 복사하여 프로필에 적용",
+        copyBtn: "[바이오 복사]",
+        copied: "✔ 클립보드 복사 완료!",
+        socialsTitle: "소셜 링크 & 스킬 매트릭스",
+        socialsMeta: "// 소셜 프로필 & 기술 숙련도",
+        termTitle: "커맨드 센터",
+        termMeta: "// 명령줄 기반 프로필 제어",
+        termWelcome: "> 다국어 i18n 시스템이 성공적으로 동기화되었습니다."
+      },
+      zh: {
+        label: "中文",
+        brand: "网络配置文件 // AXIOM",
+        role: "[SYS] 职位: 系统架构师 // 安全研究员",
+        philosophy: '"如果三行代码能解决问题，绝不写第四行。寂静与极速合二为一。sudo shutdown -r now"',
+        status: "[状态: 在线]",
+        class: "[等级: 精英黑客]",
+        scrollHint: "✦ 向下滚动获取适用于 Discord / FB / TikTok 的签名模板",
+        samplesTitle: "社交个性签名模板",
+        samplesMeta: "// 一键复制至个人资料",
+        copyBtn: "[复制签名]",
+        copied: "✔ 已成功复制至剪贴板！",
+        socialsTitle: "社交网络与技术矩阵",
+        socialsMeta: "// 社交主页与技术熟练度",
+        termTitle: "控制终端",
+        termMeta: "// 命令行配置文件管理系统",
+        termWelcome: "> 多语言 (i18n) 系统已成功连接并同步。"
+      },
+      es: {
+        label: "ESPAÑOL",
+        brand: "PERFIL_CIBERNÉTICO // AXIOM",
+        role: "[SYS] Rol: Arquitecto de Sistemas // Investigador de Seguridad",
+        philosophy: '"Nunca escribas una cuarta línea si tres son suficientes. La quietud y la velocidad son una sola cosa. sudo shutdown -r now"',
+        status: "[ESTADO: EN LÍNEA]",
+        class: "[CLASE: HACKER ÉLITE]",
+        scrollHint: "✦ DESPLÁZATE PARA COPIAR TU BIO DE DISCORD / FB / TIKTOK",
+        samplesTitle: "Plantillas de Biografía",
+        samplesMeta: "// COPIA DIRECTA PARA TU PERFIL",
+        copyBtn: "[COPIAR BIO]",
+        copied: "✔ ¡COPIADO AL PORTAPAPELES!",
+        socialsTitle: "Enlaces y Habilidades",
+        socialsMeta: "// PERFILES SOCIALES Y DOMINIO TÉCNICO",
+        termTitle: "Centro de Comando",
+        termMeta: "// CONTROLADOR DE PERFIL POR COMANDOS",
+        termWelcome: "> SISTEMA MULTILINGÜE I18N INICIALIZADO Y SINCRONIZADO."
+      }
+    };
+
+    let currentLang = 'vi';
+
+    function toggleLangMenu(e) {
+      e.stopPropagation();
+      const menu = document.getElementById('lang-dropdown-menu');
+      menu.classList.toggle('open');
+      playChillClickSound();
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.lang-dropdown-wrapper')) {
+        document.getElementById('lang-dropdown-menu').classList.remove('open');
+      }
+    });
+
+    function switchLanguage(langCode) {
+      if (!i18nData[langCode]) return;
+      currentLang = langCode;
+      const dict = i18nData[langCode];
+
+      // Update button text & hud tag
+      document.getElementById('current-lang-text').innerText = dict.label;
+      document.getElementById('hud-lang-tag').innerText = `${langCode.toUpperCase()} (${dict.label})`;
+
+      // Update menu items active state
+      document.querySelectorAll('.lang-item').forEach(item => {
+        const isThis = item.getAttribute('onclick').includes(langCode);
+        item.classList.toggle('active', isThis);
+        item.children[1].innerText = isThis ? '✓' : '';
+      });
+
+      // Update page text elements
+      document.getElementById('i18n-brand').innerText = dict.brand;
+      document.getElementById('i18n-role').innerText = dict.role;
+      document.getElementById('i18n-philosophy').innerText = dict.philosophy;
+      document.getElementById('i18n-status').innerText = dict.status;
+      document.getElementById('i18n-class').innerText = dict.class;
+      document.getElementById('i18n-scroll-hint').innerText = dict.scrollHint;
+      document.getElementById('i18n-samples-title').innerText = dict.samplesTitle;
+      document.getElementById('i18n-samples-meta').innerText = dict.samplesMeta;
+      document.getElementById('i18n-socials-title').innerText = dict.socialsTitle;
+      document.getElementById('i18n-socials-meta').innerText = dict.socialsMeta;
+      document.getElementById('i18n-term-title').innerText = dict.termTitle;
+      document.getElementById('i18n-term-meta').innerText = dict.termMeta;
+
+      document.querySelectorAll('.i18n-copy-text').forEach((el, idx) => {
+        el.innerText = `${dict.copyBtn} BẢN ${idx + 1}`;
+      });
+
+      // Close menu & play sound
+      document.getElementById('lang-dropdown-menu').classList.remove('open');
+      playChillClickSound();
+    }
+
+    /* =========================================================
+       2. CHILL CLICK SOUND SYNTHESIZER (Lo-Fi Warm Kalimba)
+       ========================================================= */
+    let audioOn = true;
+    let audioCtx = null;
+
+    function getAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    const chillScale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
+    let noteIndex = 0;
+
+    function playChillClickSound() {
+      if (!audioOn) return;
+      try {
+        const ctx = getAudio();
+        const now = ctx.currentTime;
+        
+        const freq = chillScale[noteIndex % chillScale.length];
+        noteIndex++;
+
+        const osc1 = ctx.createOscillator();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(freq, now);
+
+        const osc2 = ctx.createOscillator();
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(freq * 1.5, now);
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(950, now);
+        filter.frequency.exponentialRampToValueAtTime(300, now + 0.22);
+
+        const gain1 = ctx.createGain();
+        gain1.gain.setValueAtTime(0.001, now);
+        gain1.gain.linearRampToValueAtTime(0.07, now + 0.008);
+        gain1.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+
+        const gain2 = ctx.createGain();
+        gain2.gain.setValueAtTime(0.001, now);
+        gain2.gain.linearRampToValueAtTime(0.025, now + 0.008);
+        gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+
+        osc1.connect(gain1);
+        osc2.connect(gain2);
+        gain1.connect(filter);
+        gain2.connect(filter);
+        filter.connect(ctx.destination);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.24);
+        osc2.stop(now + 0.24);
+      } catch (e) {}
+    }
+
+    function toggleAudio() {
+      audioOn = !audioOn;
+      const btn = document.getElementById('audio-toggle');
+      btn.innerText = `SOUND: ${audioOn ? 'ON' : 'OFF'}`;
+      btn.classList.toggle('active', audioOn);
+      if (audioOn) playChillClickSound();
+    }
+
+    /* =========================================================
+       3. CLICK PARTICLES ENGINE
+       ========================================================= */
+    const particleCanvas = document.getElementById('click-particles-canvas');
+    const pCtx = particleCanvas.getContext('2d');
+
+    function resizeParticleCanvas() {
+      particleCanvas.width = window.innerWidth;
+      particleCanvas.height = window.innerHeight;
+    }
+    resizeParticleCanvas();
+    window.addEventListener('resize', resizeParticleCanvas);
+
+    const activeParticles = [];
+    const particleColors = ['#ffaa00', '#00f3ff', '#ffffff', '#ff7700', '#ffd27f'];
+
+    function spawnClickParticles(x, y) {
+      activeParticles.push({
+        type: 'ring',
+        x: x, y: y,
+        radius: 2,
+        maxRadius: Math.random() * 25 + 30,
+        alpha: 0.8,
+        color: '#ffaa00'
+      });
+
+      const count = Math.floor(Math.random() * 8) + 18;
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 4.5 + 1.8;
+        activeParticles.push({
+          type: 'spark',
+          x: x, y: y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          size: Math.random() * 3 + 1.5,
+          color: particleColors[Math.floor(Math.random() * particleColors.length)],
+          alpha: 1.0,
+          decay: Math.random() * 0.02 + 0.02,
+          drag: 0.94
+        });
+      }
+    }
+
+    function updateAndRenderParticles() {
+      pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+
+      for (let i = activeParticles.length - 1; i >= 0; i--) {
+        const p = activeParticles[i];
+
+        if (p.type === 'ring') {
+          p.radius += (p.maxRadius - p.radius) * 0.15;
+          p.alpha -= 0.035;
+          if (p.alpha <= 0) {
+            activeParticles.splice(i, 1);
+            continue;
+          }
+          pCtx.beginPath();
+          pCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          pCtx.strokeStyle = `rgba(255, 170, 0, ${p.alpha})`;
+          pCtx.lineWidth = 1.5;
+          pCtx.stroke();
+        } else if (p.type === 'spark') {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vx *= p.drag;
+          p.vy *= p.drag;
+          p.vy += 0.04;
+          p.alpha -= p.decay;
+
+          if (p.alpha <= 0) {
+            activeParticles.splice(i, 1);
+            continue;
+          }
+
+          pCtx.save();
+          pCtx.globalAlpha = p.alpha;
+          pCtx.shadowBlur = 10;
+          pCtx.shadowColor = p.color;
+          pCtx.fillStyle = p.color;
+          pCtx.beginPath();
+          pCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          pCtx.fill();
+          pCtx.restore();
+        }
+      }
+
+      requestAnimationFrame(updateAndRenderParticles);
+    }
+    requestAnimationFrame(updateAndRenderParticles);
+
+    window.addEventListener('pointerdown', (e) => {
+      spawnClickParticles(e.clientX, e.clientY);
+      playChillClickSound();
+    });
+
+    /* =========================================================
+       4. LOADER GUI LOGIC
+       ========================================================= */
+    const loaderGui = document.getElementById('loader-gui');
+    const loaderProgress = document.getElementById('loader-progress');
+    const loaderStatus = document.getElementById('loader-status');
+
+    let loadPercent = 0;
+    const loadSteps = [
+      "SYNCHRONIZING GRAVITATIONAL FIELD [20%]",
+      "LOADING VIELOTTA TYPOGRAPHY MATRIX [45%]",
+      "INITIALIZING EVENT HORIZON TEXTURES [70%]",
+      "ENFORCING ANTI-DEBUGGER TRIPWIRES [90%]",
+      "ACCESS GRANTED // READY [100%]"
+    ];
+
+    const loadInterval = setInterval(() => {
+      loadPercent += Math.floor(Math.random() * 8) + 4;
+      if (loadPercent > 100) loadPercent = 100;
+      loaderProgress.style.width = `${loadPercent}%`;
+
+      const stepIndex = Math.min(Math.floor((loadPercent / 100) * loadSteps.length), loadSteps.length - 1);
+      loaderStatus.innerText = loadSteps[stepIndex];
+
+      if (loadPercent >= 100) {
+        clearInterval(loadInterval);
+        setTimeout(() => {
+          loaderGui.classList.add('loaded');
+          playChillClickSound();
+        }, 300);
+      }
+    }, 45);
+
+    /* =========================================================
+       5. PHÒNG THỦ: CHỐNG DEVTOOLS, CHỐNG F12, CHỐNG CHUỘT PHẢI
+       ========================================================= */
+    const securityToast = document.getElementById('security-toast');
+    const toastTitle = document.getElementById('toast-title');
+    const toastDesc = document.getElementById('toast-desc');
+    let toastTimeout = null;
+
+    function triggerSecurityBreach(cause) {
+      toastTitle.innerText = `[PHÁT HIỆN CAN THIỆP]: ${cause.toUpperCase()}`;
+      toastDesc.innerText = `Hành động đã bị khóa: Hệ thống bảo mật đã vô hiệu hóa thao tác ${cause}.`;
+      securityToast.classList.add('active');
+
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        securityToast.classList.remove('active');
+      }, 3000);
+    }
+
+    document.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      triggerSecurityBreach('Chuột phải (Context Menu)');
+      return false;
+    });
+
+    document.addEventListener('selectstart', (e) => {
+      e.preventDefault();
+      triggerSecurityBreach('Bôi đen văn bản (Selection)');
+      return false;
+    });
+
+    document.addEventListener('copy', (e) => {
+      e.preventDefault();
+      triggerSecurityBreach('Sao chép trái phép (Copy)');
+      return false;
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'F12' || e.keyCode === 123) {
+        e.preventDefault();
+        triggerSecurityBreach('Phím F12 (Developer Tools)');
+        return false;
+      }
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
+        e.preventDefault();
+        triggerSecurityBreach('Tổ hợp Inspect Element');
+        return false;
+      }
+      if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
+        e.preventDefault();
+        triggerSecurityBreach('Xem mã nguồn (Ctrl+U)');
+        return false;
+      }
+      if (e.ctrlKey && (e.key === 'S' || e.key === 's')) {
+        e.preventDefault();
+        triggerSecurityBreach('Lưu trang web (Ctrl+S)');
+        return false;
+      }
+    });
+
+    const devtoolsLockdown = document.getElementById('devtools-lockdown');
+    setInterval(() => {
+      const threshold = 160;
+      const widthDiff = window.outerWidth - window.innerWidth > threshold;
+      const heightDiff = window.outerHeight - window.innerHeight > threshold;
+      if (widthDiff || heightDiff) {
+        devtoolsLockdown.classList.add('active');
+      } else {
+        devtoolsLockdown.classList.remove('active');
+      }
+    }, 600);
+
+    /* =========================================================
+       6. LIQUID GLASS 3D GYROSCOPIC TILT & PRISM GLARE
+       ========================================================= */
+    document.querySelectorAll('.liquid-glass').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -7;
+        const rotateY = ((x - centerX) / centerX) * 7;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.015, 1.015, 1.015)`;
+
+        const angle = Math.atan2(y - centerY, x - centerX) * (180 / Math.PI) + 90;
+        card.style.setProperty('--prism-angle', `${angle}deg`);
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+      });
+    });
+
+    /* =========================================================
+       7. CUSTOM SKIN CURSOR
+       ========================================================= */
+    const cursorDot = document.getElementById('cursor-dot');
+    const cursorRing = document.getElementById('cursor-ring');
+    const cursorTag = document.getElementById('cursor-tag');
+
+    let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+    let ringX = mouseX, ringY = mouseY;
+
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      cursorDot.style.left = `${mouseX}px`;
+      cursorDot.style.top = `${mouseY}px`;
+      cursorTag.style.left = `${mouseX}px`;
+      cursorTag.style.top = `${mouseY}px`;
+      cursorTag.innerText = `X:${mouseX} Y:${mouseY}`;
+    });
+
+    function renderCursor() {
+      ringX += (mouseX - ringX) * 0.18;
+      ringY += (mouseY - ringY) * 0.18;
+      cursorRing.style.left = `${ringX}px`;
+      cursorRing.style.top = `${ringY}px`;
+      requestAnimationFrame(renderCursor);
+    }
+    renderCursor();
+
+    document.querySelectorAll('a, button, .sample-card, .social-btn, input, .liquid-glass, .lang-item').forEach(el => {
+      el.addEventListener('mouseenter', () => cursorRing.classList.add('hovering'));
+      el.addEventListener('mouseleave', () => cursorRing.classList.remove('hovering'));
+    });
+
+    /* =========================================================
+       8. LENIS SMOOTH SCROLL WITH PARALLAX ZOOM
+       ========================================================= */
+    const lenis = new Lenis({
+      duration: 1.4,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      smoothTouch: false
+    });
+
+    let currentScroll = 0;
+    lenis.on('scroll', (e) => { currentScroll = e.scroll; });
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    /* =========================================================
+       9. 1-CLICK COPY BIO ENGINE
+       ========================================================= */
+    function copyBio(id, btn) {
+      const text = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        playChillClickSound();
+        const originalText = btn.innerHTML;
+        const currentDict = i18nData[currentLang] || i18nData.vi;
+        btn.innerHTML = `<span style="color:#00ff66;">${currentDict.copied}</span>`;
+        setTimeout(() => { btn.innerHTML = originalText; }, 1800);
+      });
+    }
+
+    /* =========================================================
+       10. GARGANTUA 3D BLACK HOLE BACKGROUND
+       ========================================================= */
+    const canvas = document.getElementById('blackhole-canvas');
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x030407, 0.015);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 2, 28);
+
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const blackHoleGroup = new THREE.Group();
+    scene.add(blackHoleGroup);
+
+    // Event Horizon
+    const eventHorizonGeo = new THREE.SphereGeometry(3.6, 64, 64);
+    const eventHorizonMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const eventHorizon = new THREE.Mesh(eventHorizonGeo, eventHorizonMat);
+    blackHoleGroup.add(eventHorizon);
+
+    // Photon Ring
+    const photonRingGeo = new THREE.TorusGeometry(3.75, 0.06, 32, 160);
+    const photonRingMat = new THREE.MeshBasicMaterial({ color: 0xfff0dd, transparent: true, opacity: 0.95 });
+    const photonRing = new THREE.Mesh(photonRingGeo, photonRingMat);
+    blackHoleGroup.add(photonRing);
+
+    // Plasma Accretion Texture
+    function createAccretionTexture() {
+      const c = document.createElement('canvas');
+      c.width = 1024; c.height = 128;
+      const ctx = c.getContext('2d');
+      const grad = ctx.createLinearGradient(0, 0, 1024, 0);
+      grad.addColorStop(0.0, 'rgba(255,255,255,1)');
+      grad.addColorStop(0.12, 'rgba(255,210,120,0.95)');
+      grad.addColorStop(0.35, 'rgba(255,140,20,0.8)');
+      grad.addColorStop(0.65, 'rgba(210,50,5,0.45)');
+      grad.addColorStop(0.95, 'rgba(60,10,0,0.15)');
+      grad.addColorStop(1.0, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 1024, 128);
+
+      for (let i = 0; i < 300; i++) {
+        ctx.fillStyle = `rgba(255, ${Math.random()*180 + 75}, 30, ${Math.random() * 0.4})`;
+        ctx.fillRect(Math.random() * 1024, Math.random() * 128, Math.random() * 40 + 10, Math.random() * 3 + 1);
+      }
+      return new THREE.CanvasTexture(c);
+    }
+    const plasmaTex = createAccretionTexture();
+
+    // Main Accretion Disk
+    const diskGeo = new THREE.RingGeometry(3.8, 14.0, 128, 8);
+    const diskMat = new THREE.MeshBasicMaterial({
+      map: plasmaTex,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.88,
+      blending: THREE.AdditiveBlending
+    });
+    const accretionDisk = new THREE.Mesh(diskGeo, diskMat);
+    accretionDisk.rotation.x = Math.PI / 2.2;
+    blackHoleGroup.add(accretionDisk);
+
+    // Vertical Lensing Halo
+    const lensedDiskGeo = new THREE.RingGeometry(3.8, 11.0, 128, 8);
+    const lensedDiskMat = new THREE.MeshBasicMaterial({
+      map: plasmaTex,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.65,
+      blending: THREE.AdditiveBlending
+    });
+    const lensedDisk = new THREE.Mesh(lensedDiskGeo, lensedDiskMat);
+    blackHoleGroup.add(lensedDisk);
+
+    // Inflow Particles
+    const particleCount = 6000;
+    const particleGeo = new THREE.BufferGeometry();
+    const particlePos = new Float32Array(particleCount * 3);
+    const particleAngle = new Float32Array(particleCount);
+    const particleRadius = new Float32Array(particleCount);
+    const particleSpeed = new Float32Array(particleCount);
+
+    for (let i = 0; i < particleCount; i++) {
+      const r = Math.random() * 12 + 3.8;
+      const angle = Math.random() * Math.PI * 2;
+      particleRadius[i] = r;
+      particleAngle[i] = angle;
+      particleSpeed[i] = (1 / Math.sqrt(r)) * 0.025;
+
+      particlePos[i * 3] = Math.cos(angle) * r;
+      particlePos[i * 3 + 1] = (Math.random() - 0.5) * (r * 0.15);
+      particlePos[i * 3 + 2] = Math.sin(angle) * r;
+    }
+
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
+    const particleMat = new THREE.PointsMaterial({
+      color: 0xffb74d,
+      size: 0.11,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending
+    });
+    const accretionParticles = new THREE.Points(particleGeo, particleMat);
+    accretionDisk.add(accretionParticles);
+
+    // Deep Space Stars
+    const starCount = 2000;
+    const starGeo = new THREE.BufferGeometry();
+    const starPos = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount * 3; i++) {
+      starPos[i] = (Math.random() - 0.5) * 120;
+    }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    const starMat = new THREE.PointsMaterial({ color: 0x90b0d0, size: 0.12, opacity: 0.4, transparent: true });
+    scene.add(new THREE.Points(starGeo, starMat));
+
+    // Mouse Tracking
+    let mouseNormX = 0, mouseNormY = 0;
+    let targetRotX = 0, targetRotY = 0;
+    const zoomEl = document.getElementById('hud-zoom');
+
+    window.addEventListener('mousemove', (e) => {
+      mouseNormX = (e.clientX - window.innerWidth / 2) * 0.0008;
+      mouseNormY = (e.clientY - window.innerHeight / 2) * 0.0008;
+    });
+
+    let wheelZoomOffset = 0;
+    window.addEventListener('wheel', (e) => {
+      wheelZoomOffset = Math.min(Math.max(wheelZoomOffset + e.deltaY * 0.015, -12), 15);
+    }, { passive: true });
+
+    // Animation Loop
+    let clock = new THREE.Clock();
+    let speedBoost = 1.0;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+
+      accretionDisk.rotation.z += 0.004 * speedBoost;
+      lensedDisk.rotation.z += 0.003 * speedBoost;
+
+      const positions = accretionParticles.geometry.attributes.position.array;
+      for (let i = 0; i < particleCount; i++) {
+        particleAngle[i] += particleSpeed[i] * speedBoost;
+        particleRadius[i] -= 0.006 * speedBoost;
+        if (particleRadius[i] < 3.8) {
+          particleRadius[i] = 15.5;
+        }
+        positions[i * 3] = Math.cos(particleAngle[i]) * particleRadius[i];
+        positions[i * 3 + 2] = Math.sin(particleAngle[i]) * particleRadius[i];
+      }
+      accretionParticles.geometry.attributes.position.needsUpdate = true;
+
+      targetRotX += (mouseNormY - targetRotX) * 0.05;
+      targetRotY += (mouseNormX - targetRotY) * 0.05;
+      blackHoleGroup.rotation.x = targetRotX * 1.5;
+      blackHoleGroup.rotation.y = targetRotY * 1.5;
+
+      // Parallax Zoom
+      const scrollProgress = currentScroll * 0.0016;
+      const targetZ = 28 - Math.min(scrollProgress * 6.5, 18) + wheelZoomOffset;
+      camera.position.z += (targetZ - camera.position.z) * 0.1;
+      blackHoleGroup.position.y = -Math.sin(scrollProgress * 0.8) * 4;
+
+      if (zoomEl) zoomEl.innerText = camera.position.z.toFixed(1);
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    /* =========================================================
+       11. TERMINAL PROFILE COMMANDS
+       ========================================================= */
+    const termDisplay = document.getElementById('term-display');
+    const termIn = document.getElementById('term-in');
+
+    function smoothAppendTerm(textHtml, isUser = false) {
+      const line = document.createElement('div');
+      if (isUser) {
+        line.innerHTML = `<span style="color:var(--accent);">root@profile:~$</span> ${textHtml}`;
+        termDisplay.appendChild(line);
+        termDisplay.scrollTop = termDisplay.scrollHeight;
+      } else {
+        line.innerHTML = '';
+        termDisplay.appendChild(line);
+        let idx = 0;
+        function step() {
+          if (idx <= textHtml.length) {
+            line.innerHTML = textHtml.slice(0, idx);
+            idx += 2;
+            termDisplay.scrollTop = termDisplay.scrollHeight;
+            setTimeout(step, 10);
+          } else {
+            line.innerHTML = textHtml;
+          }
+        }
+        step();
+      }
+    }
+
+    function handleCommand(e) {
+      e.preventDefault();
+      const raw = termIn.value.trim();
+      if (!raw) return;
+
+      smoothAppendTerm(raw, true);
+      playChillClickSound();
+      termIn.value = '';
+
+      const parts = raw.split(' ');
+      const cmd = parts[0].toLowerCase();
+
+      setTimeout(() => {
+        switch(cmd) {
+          case 'name':
+            if (parts.length > 1) {
+              const newName = parts.slice(1).join(' ');
+              document.getElementById('user-display-name').innerText = newName;
+              smoothAppendTerm(`<span style="color:#00ff66;">> ĐÃ CẬP NHẬT TÊN HIỂN THỊ THÀNH: '${newName}'</span>`);
+            } else {
+              smoothAppendTerm('> Cách dùng: name &lt;Tên_Của_Bạn&gt;');
+            }
+            break;
+          case 'help':
+            smoothAppendTerm('DANH SÁCH LỆNH PROFILE:');
+            setTimeout(() => smoothAppendTerm('- <b>name &lt;tên&gt;</b>: Đổi nickname hiển thị trực tiếp trên web'), 80);
+            setTimeout(() => smoothAppendTerm('- <b>boost</b>: Tăng tốc đĩa bồi tụ hố đen'), 160);
+            setTimeout(() => smoothAppendTerm('- <b>clear</b>: Xóa màn hình terminal'), 240);
+            break;
+          case 'boost':
+            speedBoost = 5.0;
+            playChillClickSound();
+            smoothAppendTerm('<span style="color:var(--accent);">> QUÁ TẢI LÕI: TỐC ĐỘ BỒI TỤ ĐẠT CỰC HẠN!</span>');
+            setTimeout(() => { speedBoost = 1.0; }, 1600);
+            break;
+          case 'clear':
+            termDisplay.innerHTML = '';
+            break;
+          default:
+            smoothAppendTerm(`<span style="color:#ff5555">> Lệnh không xác định: '${cmd}'. Gõ 'help' để xem hướng dẫn.</span>`);
+        }
+      }, 100);
+    }
+  </script>
+</body>
+</html>

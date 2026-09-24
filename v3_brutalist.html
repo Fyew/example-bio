@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NODE_03 // BRUTALIST</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; color: #f00; font-family: "Courier New", Courier, monospace; line-height: 1.4; padding: 40px 20px; }
+  .container { max-width: 800px; margin: 0 auto; border: 2px solid #f00; padding: 30px; box-shadow: 10px 10px 0 #f00; position: relative; }
+  
+  pre.ascii { font-size: 10px; line-height: 10px; font-weight: bold; overflow-x: hidden; text-align: center; margin-bottom: 30px; animation: flicker 4s infinite; }
+  
+  h1 { font-size: 3rem; text-transform: uppercase; border-bottom: 4px solid #f00; margin-bottom: 20px; padding-bottom: 10px; word-break: break-all; }
+  h2 { font-size: 1.5rem; background: #f00; color: #000; display: inline-block; padding: 5px 10px; margin-bottom: 25px; }
+  
+  p { font-size: 1.2rem; margin-bottom: 30px; font-weight: bold; }
+  
+  ul { list-style-type: none; margin-bottom: 40px; }
+  ul li { font-size: 1.2rem; padding: 10px 0; border-bottom: 1px dashed #f00; display: flex; align-items: center; }
+  ul li::before { content: "[!]"; margin-right: 15px; }
+  
+  .links { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media(max-width: 600px) { .links { grid-template-columns: 1fr; } }
+  .links a { display: block; background: #000; color: #f00; border: 2px solid #f00; padding: 15px; text-align: center; font-size: 1.3rem; text-decoration: none; font-weight: bold; text-transform: uppercase; }
+  .links a:hover { background: #f00; color: #000; animation: shake 0.2s infinite; }
+
+  @keyframes flicker {
+    0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% { opacity: 1; text-shadow: 0 0 5px #f00; }
+    20%, 21.999%, 63%, 63.999%, 65%, 69.999% { opacity: 0.2; text-shadow: none; }
+  }
+  @keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    20% { transform: translate(-1px, -2px) rotate(-1deg); }
+    40% { transform: translate(-3px, 0px) rotate(1deg); }
+    60% { transform: translate(3px, 2px) rotate(0deg); }
+    80% { transform: translate(1px, -1px) rotate(1deg); }
+    100% { transform: translate(-1px, 2px) rotate(-1deg); }
+  }
+  .back-btn { position: absolute; top: -35px; left: 0; color: #f00; text-decoration: none; border: 1px solid #f00; padding: 5px 10px; font-weight: bold; background: #000; }
+  .back-btn:hover { background: #f00; color: #000; }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="index.html" class="back-btn">< GO BACK</a>
+  <pre class="ascii">
+      .                                                      .
+        .n                   .                 .                  n.
+  .   .dP                  dP                   9b                 9b.    .
+ 4    qXb         .       dX                     Xb       .        dXp     t
+dX.    9Xb      .dXb    __                         __    dXb.     dXP     .Xb
+9XXb._       _.dXXXXb dXXXXbo.                 .odXXXXb dXXXXb._       _.dXXP
+ 9XXXXXXXXXXXXXXXXXXXVXXXXXXXXOo.           .oOXXXXXXXXVXXXXXXXXXXXXXXXXXXXP
+  `9XXXXXXXXXXXXXXXXXXXXX'~   ~`OOO8b   d8OOO'~   ~`XXXXXXXXXXXXXXXXXXXXXP'
+    `9XXXXXXXXXXXP' `9XX'   DIE    `98v8P'  HUMAN   `XXP' `9XXXXXXXXXXXP'
+        ~~~~~~~       9X.          .db|db.          .XP       ~~~~~~~
+                        )b.  .dbo.dP'`v'`9b.odb.  .dX(
+                      ,dXXXXXXXXXXXb     dXXXXXXXXXXXb.
+                     dXXXXXXXXXXXP'   .   `9XXXXXXXXXXXb
+                    dXXXXXXXXXXXXb   d|b   dXXXXXXXXXXXXb
+                    9XXb'   `XXXXXb.dX|Xb.dXXXXX'   `dXXP
+                     `'      9XXXXXX(   )XXXXXXP      `'
+                              XXXX X.`v'.X XXXX
+                              XP^X'`b   d'`X^XX
+                              X. 9  `   '  P )X
+                              `b  `       '  d'
+                               `             '
+  </pre>
+  
+  <h1>ZERO_DAY_SYNDICATE</h1>
+  <h2>WARNING: UNAUTHORIZED ACCESS</h2>
+  <p>We do not forgive. We do not forget. Data wants to be free, and we are the liberators.</p>
+  
+  <ul>
+    <li>EXPLOIT_DEVELOPMENT</li>
+    <li>INFRASTRUCTURE_TAKEDOWN</li>
+    <li>DATA_LEAKAGE</li>
+  </ul>
+  
+  <div class="links">
+    <a href="https://github.com">SECURE_REPO</a>
+    <a href="mailto:void@dark.net">ENCRYPTED_COMMS</a>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NODE_01 // TERMINAL</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Fira Code', monospace; background-color: #050505; color: #00ff41; min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+  canvas#matrix { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; opacity: 0.2; }
+  .terminal-card { position: relative; z-index: 10; background: rgba(5, 5, 5, 0.9); border: 1px solid #00ff41; box-shadow: 0 0 15px rgba(0,255,65,0.2); padding: 40px; width: 90%; max-width: 600px; border-radius: 2px; }
+  .terminal-header { display: flex; justify-content: space-between; border-bottom: 1px dashed #00ff41; padding-bottom: 10px; margin-bottom: 25px; opacity: 0.8; font-size: 14px; }
+  .avatar-container { text-align: center; margin-bottom: 20px; }
+  .avatar { width: 120px; height: 120px; border: 2px solid #00ff41; object-fit: cover; filter: grayscale(100%) contrast(150%) sepia(100%) hue-rotate(80deg); }
+  
+  /* Proper Glitch Effect */
+  .glitch { font-size: 2.2em; font-weight: bold; position: relative; text-align: center; margin-bottom: 15px; letter-spacing: 2px; display: inline-block; width: 100%; }
+  .glitch::before, .glitch::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 5, 5, 0.9); }
+  .glitch::before { left: 2px; text-shadow: -2px 0 red; clip: rect(24px, 550px, 90px, 0); animation: glitch-anim 3s infinite linear alternate-reverse; }
+  .glitch::after { left: -2px; text-shadow: -2px 0 blue; clip: rect(85px, 550px, 140px, 0); animation: glitch-anim 2s infinite linear alternate-reverse; }
+  @keyframes glitch-anim {
+    0% { clip: rect(10px, 9999px, 30px, 0); }
+    20% { clip: rect(50px, 9999px, 80px, 0); }
+    40% { clip: rect(20px, 9999px, 100px, 0); }
+    60% { clip: rect(80px, 9999px, 20px, 0); }
+    80% { clip: rect(10px, 9999px, 70px, 0); }
+    100% { clip: rect(60px, 9999px, 40px, 0); }
+  }
+  
+  .typing-container { min-height: 80px; margin-bottom: 20px; color: #a0a0a0; font-size: 14px; line-height: 1.6; }
+  .typing-text::after { content: '_'; animation: blink 1s infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .skills { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 30px; }
+  .skill-tag { border: 1px solid #00ff41; padding: 5px 10px; font-size: 12px; background: rgba(0,255,65,0.05); transition: 0.2s; cursor: pointer; }
+  .skill-tag:hover { background: #00ff41; color: #000; }
+  .links { display: flex; flex-direction: column; gap: 10px; }
+  .link-btn { display: block; padding: 10px; text-align: center; color: #00ff41; text-decoration: none; border: 1px solid #00ff41; text-transform: uppercase; transition: 0.3s; }
+  .link-btn:hover { background: #00ff41; color: #000; }
+  .back-btn { position: absolute; top: 20px; left: 20px; color: #00ff41; text-decoration: none; font-size: 12px; border: 1px solid #00ff41; padding: 5px 10px; z-index: 100; background: #050505; }
+  .back-btn:hover { background: #00ff41; color: #000; }
+</style>
+</head>
+<body>
+<a href="index.html" class="back-btn">< BACK</a>
+<canvas id="matrix"></canvas>
+<div class="terminal-card">
+  <div class="terminal-header"><span>root@sys:~# ./profile</span><span id="clock"></span></div>
+  <div class="avatar-container"><img src="https://i.pravatar.cc/300?img=33" alt="Avatar" class="avatar"></div>
+  <div class="glitch" data-text="ELITE_HACKER">ELITE_HACKER</div>
+  <div class="typing-container"><span class="typing-text" id="typewriter"></span></div>
+  <div class="skills">
+    <div class="skill-tag">PEN-TESTING</div><div class="skill-tag">EXPLOIT_DEV</div><div class="skill-tag">REVERSE_ENG</div>
+  </div>
+  <div class="links">
+    <a href="https://github.com" class="link-btn">> GITHUB</a>
+    <a href="https://x.com" class="link-btn">> X_CORP</a>
+  </div>
+</div>
+<script>
+  // Matrix rain via requestAnimationFrame
+  const cvs = document.getElementById('matrix'), ctx = cvs.getContext('2d');
+  let w, h, cols, drops;
+  function initMatrix() {
+    w = cvs.width = window.innerWidth; h = cvs.height = window.innerHeight;
+    cols = Math.floor(w / 16) + 1; drops = Array(cols).fill(0);
+  }
+  initMatrix(); window.addEventListener('resize', initMatrix);
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッン'.split('');
+  let lastTime = 0;
+  function draw(time) {
+    requestAnimationFrame(draw);
+    if (time - lastTime < 45) return; // limit to ~22fps for classic feel and performance
+    lastTime = time;
+    ctx.fillStyle = 'rgba(5, 5, 5, 0.08)'; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#0F0'; ctx.font = '16px monospace';
+    for(let i=0; i<cols; i++) {
+      ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*16, drops[i]*16);
+      if(drops[i]*16 > h && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+  }
+  requestAnimationFrame(draw);
+  
+  // Typewriter
+  const text = "> INITIATING CONNECTION...\n> BYPASSING FIREWALL...\n> ACCESS GRANTED.\n> Security is an illusion.";
+  const tw = document.getElementById('typewriter'); let i = 0;
+  function typeWriter() {
+    if (i < text.length) {
+      tw.innerHTML += text.charAt(i) === '\n' ? '<br/>' : text.charAt(i); i++;
+      setTimeout(typeWriter, Math.random() * 40 + 20);
+    }
+  }
+  setTimeout(typeWriter, 500);
+  
+  // Clock
+  setInterval(() => {
+    document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US', {hour12:false});
+  }, 1000);
+</script>
+</body>
+</html>
